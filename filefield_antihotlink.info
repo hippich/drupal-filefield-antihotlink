@@ -1,0 +1,7 @@
+; $Id$
+name = Filefield Anti-Hotlink 
+description = Files hotlinking protection
+package = CCK
+core = 6.x
+dependencies[] = filefield_stats
+

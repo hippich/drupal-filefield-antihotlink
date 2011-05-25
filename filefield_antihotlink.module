@@ -1,0 +1,35 @@
+<?php
+// $Id$
+
+function filefield_antihotlink_menu_alter(&$items) {
+  // The file path changes depending on the file_download setting
+  switch (variable_get('file_downloads', FILE_DOWNLOADS_PUBLIC)) {
+    case FILE_DOWNLOADS_PUBLIC :
+      $filepath = file_directory_path();
+      break;
+
+    case FILE_DOWNLOADS_PRIVATE:
+      $filepath = 'system/files';
+      break;
+  }
+
+  $items[$filepath .'/filefield_stats/%field_file/%filefield_stats_node_revision/%user']['access callback'] = 'filefield_antihotlink_download_check';
+}
+
+
+function filefield_antihotlink_download_check($file, $node, $url_user, $hash) {
+  global $user;
+  $check = ($user->uid == $url_user->uid) && ($hash == filefield_stats_hash(array($file['fid'], $node->vid, $url_user->uid)));
+  
+  if (!$check) {
+    drupal_goto('node/'. $node->nid);
+  }
+  
+  return true;
+}
+
+
+function filefield_antihotlink_filefield_stats_hash_alter(&$data) {
+  global $user;
+  $data['hash'] = md5(implode(':', array_merge($data['args'], array(drupal_get_private_key(), session_name()))));
+}
